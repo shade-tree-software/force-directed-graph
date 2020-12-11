@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+    .links path.event-link {
+        stroke: darkgreen;
+    }
+
+    .links path.attribute-link {
+        stroke: red;
+    }
+
+    .nodes circle {
+        stroke: #000;
+        stroke-width: 1.5px;
+    }
+
+    text {
+        font-family: sans-serif;
+        font-size: 10px;
+    }
+
+</style>
+<svg width="960" height="600"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+
+    var getColor = function (group) {
+        if (group) {
+            return d3.scaleOrdinal(d3.schemeCategory20)(group)
+        } else {
+            return '#000'
+        }
+    }
+
+    var simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().id(function (d) {
+            return d.id;
+        }))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+    d3.json("miserables.json", function (error, graph) {
+        if (error) throw error;
+
+        const link = svg.append("g")
+            .attr("fill", "none")
+            .attr("class", "links")
+            .selectAll("path")
+            .data(graph.links)
+            .enter().append("path")
+            .attr('class', (d) => d.type === 'event' ? 'event-link' : 'attribute-link')
+            .attr("stroke-width", function (d) {
+                return Math.sqrt(d.value);
+            })
+            .attr("marker-end", d => `url(${new URL(`#arrow-${d.type}`, location)})`)
+
+        const node = svg.append("g")
+            .attr("class", "nodes")
+            .selectAll("g")
+            .data(graph.nodes)
+            .enter().append("g")
+
+        node.append("circle")
+            .attr("r", function (d) {
+                return d.type === 'entity' ? 10 : 5
+            })
+            .attr("fill", function (d) {
+                return getColor(d.group);
+            })
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        node.append("text")
+            .text(function (d) {
+                return d.id;
+            })
+            .attr('x', 12)
+            .attr('y', 6);
+
+        node.append("title")
+            .text(function (d) {
+                return d.id;
+            });
+
+        svg.append("defs").selectAll("marker")
+            .data(['event'])
+            .enter().append("marker")
+            .attr("id", d => `arrow-${d}`)
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 15)
+            .attr("refY", -0.5)
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr('stroke', 'darkgreen')
+            .attr('fill', 'darkgreen')
+
+        simulation.nodes(graph.nodes).on("tick", ticked);
+
+        simulation.force("link").distance(function (d) {
+            return d.type === 'event' ? 200 : 50
+        }).links(graph.links)
+
+        function linkArc(d) {
+            if (d.type === 'event') {
+                const r = Math.hypot(d.target.x - d.source.x, d.target.y - d.source.y);
+                return `M${d.source.x},${d.source.y}A${r},${r} 0 0,1 ${d.target.x},${d.target.y}`
+            } else {
+                return `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`
+            }
+        }
+
+        function ticked() {
+            link.attr('d', linkArc)
+            node.attr("transform", function (d) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                })
+        }
+    });
+
+    function dragstarted(d) {
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(d) {
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
+    }
+
+    function dragended(d) {
+        if (!d3.event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+
+</script>

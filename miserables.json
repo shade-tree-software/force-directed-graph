@@ -1,0 +1,26 @@
+{
+  "nodes": [
+    {"id": "1", "group": 0, "type": "entity"},
+    {"id": "2", "group": 0, "type": "entity"},
+    {"id": "1a", "group": 1, "type": "attribute"},
+    {"id": "1b", "group": 2, "type": "attribute"},
+    {"id": "1c", "group": 2, "type": "attribute"},
+    {"id": "1d", "group": 3, "type": "attribute"},
+    {"id": "2a", "group": 1, "type": "attribute"},
+    {"id": "2b", "group": 2, "type": "attribute"},
+    {"id": "2c", "group": 2, "type": "attribute"},
+    {"id": "2d", "group": 3, "type": "attribute"}
+  ],
+  "links": [
+    {"source": "1", "target": "2", "value": 5, "type": "event"},
+    {"source": "2", "target": "1", "value": 1, "type": "event"},
+    {"source": "1", "target": "1a", "value": 1, "type": "attribute"},
+    {"source": "1", "target": "1b", "value": 1, "type": "attribute"},
+    {"source": "1", "target": "1c", "value": 1, "type": "attribute"},
+    {"source": "1", "target": "1d", "value": 1, "type": "attribute"},
+    {"source": "2", "target": "2a", "value": 1, "type": "attribute"},
+    {"source": "2", "target": "2b", "value": 1, "type": "attribute"},
+    {"source": "2", "target": "2c", "value": 1, "type": "attribute"},
+    {"source": "2", "target": "2d", "value": 1, "type": "attribute"}
+  ]
+}
